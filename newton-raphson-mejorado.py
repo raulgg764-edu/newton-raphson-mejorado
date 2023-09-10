@@ -4,15 +4,25 @@ import sympy
 from sympy import *
 from sympy.parsing.sympy_parser import  parse_expr, standard_transformations, implicit_multiplication_application, convert_xor
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
 import numpy as np  
 
 x = sympy.symbols('x')
 transformations = (standard_transformations + (implicit_multiplication_application,) + (convert_xor,))
 
+
 canvas=None
+
 window = tk.Tk()
-window.geometry("600x600")
+window.title="Metodo Newton-Raphson Mejorado"
+wSize=800
+hSize=600
+ws=window.winfo_screenwidth()
+hs=window.winfo_screenheight()
+xSize=(ws/2)-(wSize/2)
+ySize=(hs/2)-(hSize/2)
+window.geometry('%dx%d+%d+%d'%(wSize,hSize,xSize,ySize))  
+
 
 # Funciones
 def getEquation():
@@ -34,7 +44,7 @@ def improvedNewtonRaphson(eq, xi):
     print(secondDerivative)
     actualError=100
     lastSolution=xi
-    while(actualError>0.000001 and iterations < max_iterations):
+    while(actualError>0 and iterations < max_iterations):
         xSolution=lastSolution-((eq.subs(x,lastSolution).evalf()*derivative.subs(x,lastSolution).evalf())/(pow(derivative.subs(x,lastSolution).evalf(),2)-eq.subs(x,lastSolution).evalf()*secondDerivative.subs(x,lastSolution).evalf()))
         xSolutionValue=xSolution.evalf()
         print(xSolutionValue)
@@ -43,8 +53,10 @@ def improvedNewtonRaphson(eq, xi):
         lastSolution=xSolutionValue
         print(actualError)
         iterations+=1
-
-    result_label.config(text=f"Raíz encontrada: {lastSolution}")
+    if(lastSolution==nan):
+        result_label.config(text=f"Raíz no encontrada")
+    else:
+        result_label.config(text=f"Raíz encontrada: {lastSolution}")
     plotGraph()
     
 
@@ -58,7 +70,7 @@ def plotGraph():
 
     eq = equation.get()
     eqParse = parse_expr(eq, transformations=transformations)
-    x_values = np.linspace(-10, 10, 400)
+    x_values = np.linspace(-25, 25, 400)
     y_values = [eqParse.subs(x, val).evalf() for val in x_values]
     
     plt.figure(figsize=(8, 6))
@@ -72,6 +84,7 @@ def plotGraph():
     #plt.show()
 
     canvas = FigureCanvasTkAgg(plt.gcf(), master=window)
+    
     canvas_widget = canvas.get_tk_widget()
     canvas_widget.pack(padx=20,pady=10)
     isActive=1
@@ -97,6 +110,7 @@ btnGraficar.pack(padx=10, pady=10)
 
 result_label = tk.Label(text="Resultado: ")
 result_label.pack(pady=10)
+
 
 # Pack and loop
 window.mainloop()
